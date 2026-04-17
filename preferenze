@@ -1,0 +1,18 @@
+**1. Quale GPU vuoi tenere libera?**
+La 6 che vedo in nvidia-smi (che già non è in CUDA_VISIBLE_DEVICES), o un'altra?
+
+**2. Quanto VRAM ti serve per il modello principale?**
+Qwen3.6 35B Q4_K_M = ~22GB. Su quante GPU preferisci distribuirlo? (2 = ~11GB each, 3 = ~7-8GB each, 6 = ~3.5GB each)
+
+**3. Come vuoi gestire le sessioni simultanee?**
+Scenario A: 2 Hermes + OpenWebUI usano lo STESSO modello caricato (concurrency)
+Scenario B: Hai bisogno di 2 istanze SEPARATE del modello (carichi 2 volte, ~44GB VRAM)
+Scenario C: Fai switching rapido tra modelli
+
+**4. Hai già provato `OLLAMA_NUM_GPU=00 (o 1, o 2) per forcere il load su più GPU?
+E `OLLAMA_GPU_SPLIT=` ?
+
+**5. RAM del sistema host?**
+Quanta RAM hai? (per capire se posso suggerire cache su RAM con `OLLAMA_KEEP_ALIVE` più aggressiva)
+
+**6. Hai altri workload GPU oltre Ollama?**
