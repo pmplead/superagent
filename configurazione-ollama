@@ -1,0 +1,131 @@
+# capitolo 1.
+```
+version: "3.9"
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: hermesollama
+    restart: unless-stopped
+
+    ports:
+      - "11435:11434"
+
+    environment:
+      # networking
+      - OLLAMA_HOST=0.0.0.0
+      - OLLAMA_ORIGINS=http://xxx,http://xxx,http://xxx
+
+      # parallelismo (realistico per la tua CPU)
+      #- OLLAMA_NUM_PARALLEL=1
+      - OLLAMA_MAX_LOADED_MODELS=1
+      # Usa tutte e 6 le GPU, ma con split conservativo
+      #- OLLAMA_NUM_GPU=6
+      - OLLAMA_GPU_SPLIT=2,2,2
+      - OLLAMA_MAX_QUEUE=2
+
+      # GPU
+      - CUDA_VISIBLE_DEVICES=0,1,2,3,4,5
+      #- NVIDIA_VISIBLE_DEVICES=0,1,2,3,4,5
+      #- NVIDIA_DRIVER_CAPABILITIES=compute,utility
+      - OLLAMA_KEEP_ALIVE=10h
+      - OLLAMA_LOAD_TIMEOUT=900
+
+    volumes:
+      - /srv/ai1/ollamaebasta:/root/.ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]
+volumes:
+  ollama:
+```
+# capitolo 2.
+allo stato attuale ho questa configurazione su host:
+```
+root@AI-UNO:/srv/ai1/ollamaebasta# nvidia-smi
+Fri Apr 17 09:58:24 2026
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 550.163.01             Driver Version: 550.163.01     CUDA Version: 12.4     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA GeForce RTX 3060        On  |   00000000:08:00.0 Off |                  N/A |
+|  0%   38C    P8             10W /  170W |   10314MiB /  12288MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+|   1  NVIDIA GeForce RTX 3060        On  |   00000000:0A:00.0 Off |                  N/A |
+|  0%   38C    P8             11W /  170W |    9434MiB /  12288MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+|   2  NVIDIA GeForce RTX 3060        On  |   00000000:0B:00.0 Off |                  N/A |
+|  0%   37C    P8             11W /  170W |    8978MiB /  12288MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+|   3  NVIDIA GeForce RTX 3060        On  |   00000000:0C:00.0 Off |                  N/A |
+|  0%   35C    P8             13W /  170W |    9538MiB /  12288MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+|   4  NVIDIA GeForce RTX 3060        On  |   00000000:0D:00.0 Off |                  N/A |
+|  0%   39C    P8             11W /  170W |       4MiB /  12288MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+|   5  NVIDIA GeForce RTX 3060        On  |   00000000:0F:00.0 Off |                  N/A |
+|  0%   38C    P8             10W /  170W |       4MiB /  12288MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+|   6  NVIDIA GeForce RTX 3060        On  |   00000000:10:00.0 Off |                  N/A |
+|  0%   39C    P8             18W /  170W |     108MiB /  12288MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI        PID   Type   Process name                              GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|    0   N/A  N/A      3300      C   /usr/bin/ollama                             10308MiB |
+|    1   N/A  N/A      3300      C   /usr/bin/ollama                              9428MiB |
+|    2   N/A  N/A      3300      C   /usr/bin/ollama                              8972MiB |
+|    3   N/A  N/A      3300      C   /usr/bin/ollama                              9532MiB |
+|    6   N/A  N/A      3300      C   /usr/bin/ollama                               102MiB |
++-----------------------------------------------------------------------------------------+
+```
+# capitolo 3.
+output della ollama in stato di run del modello show e run
+```
+root@AI-UNO:/srv/ai1/ollamaebasta# docker exec -it hermesollama ollama show qwen3.6:35b-a3b
+  Model
+    architecture        qwen35moe
+    parameters          36.0B
+    context length      262144
+    embedding length    2048
+    quantization        Q4_K_M
+
+  Capabilities
+    completion
+    vision
+    tools
+    thinking
+
+  Parameters
+    presence_penalty    1.5
+    repeat_penalty      1
+    temperature         1
+    top_k               20
+    top_p               0.95
+    min_p               0
+
+  License
+    Apache License
+    Version 2.0, January 2004
+    ...
+```
+```
+root@AI-UNO:/srv/ai1/ollamaebasta# docker exec -it hermesollama ollama ps
+NAME               ID              SIZE     PROCESSOR    CONTEXT    UNTIL
+qwen3.6:35b-a3b    07d35212591f    39 GB    100% GPU     262144     9 hours from now
+```
