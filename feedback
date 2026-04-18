@@ -1,3 +1,66 @@
+****da dentro il container
+root@4cfe4605640e:/# nvidia-smi -q | grep "GPU Utilization\|GPU Power Draw\|Memory Usage"
+    FB Memory Usage
+    BAR1 Memory Usage
+    Conf Compute Protected Memory Usage
+    FB Memory Usage
+    BAR1 Memory Usage
+    Conf Compute Protected Memory Usage
+    FB Memory Usage
+    BAR1 Memory Usage
+    Conf Compute Protected Memory Usage
+    FB Memory Usage
+    BAR1 Memory Usage
+    Conf Compute Protected Memory Usage
+    FB Memory Usage
+    BAR1 Memory Usage
+    Conf Compute Protected Memory Usage
+    FB Memory Usage
+    BAR1 Memory Usage
+    Conf Compute Protected Memory Usage
+root@4cfe4605640e:/# nvidia-smi
+Sat Apr 18 07:31:04 2026
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 550.163.01             Driver Version: 550.163.01     CUDA Version: 12.4     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA GeForce RTX 3060        On  |   00000000:08:00.0 Off |                  N/A |
+|  0%   40C    P8             10W /  170W |   10312MiB /  12288MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+|   1  NVIDIA GeForce RTX 3060        On  |   00000000:0A:00.0 Off |                  N/A |
+|  0%   41C    P8             11W /  170W |    9432MiB /  12288MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+|   2  NVIDIA GeForce RTX 3060        On  |   00000000:0B:00.0 Off |                  N/A |
+|  0%   40C    P8             11W /  170W |    8978MiB /  12288MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+|   3  NVIDIA GeForce RTX 3060        On  |   00000000:0C:00.0 Off |                  N/A |
+|  0%   37C    P8             13W /  170W |    9538MiB /  12288MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+|   4  NVIDIA GeForce RTX 3060        On  |   00000000:0D:00.0 Off |                  N/A |
+|  0%   37C    P8             10W /  170W |       4MiB /  12288MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+|   5  NVIDIA GeForce RTX 3060        On  |   00000000:0F:00.0 Off |                  N/A |
+|  0%   37C    P8              9W /  170W |     108MiB /  12288MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI        PID   Type   Process name                              GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
++-----------------------------------------------------------------------------------------+
+
+
+*******************************
 NAME               ID              SIZE     PROCESSOR    CONTEXT    UNTIL
 qwen3.6:35b-a3b    07d35212591f    39 GB    100% GPU     262144     2 hours from now
 root@AI-UNO:/srv/ai1/ollamaebasta# docker exec -it hermesollama ollama show qwen3.6:35b-a3b
