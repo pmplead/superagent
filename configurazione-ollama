@@ -125,6 +125,81 @@ root@AI-UNO:/srv/ai1/ollamaebasta# docker exec -it hermesollama ollama show qwen
     ...
 ```
 ```
+
+***capitolo 2
+settings suggerito after feedback
+Grazie per il feedback! Ho letto il file. Ecco la situazione:
+
+---
+
+### 📊 Analisi dati
+
+**`ollama ps` mostra:**
+- `qwen3.6:35b-a3b` → 39 GB, 100% GPU, 262144 tokens di contesto, attivo per 2 ore
+- ✅ Il modello è caricato correttamente
+
+**`nvidia-smi` mostra il VRAM usato per GPU:**
+| GPU | VRAM Usata | Utilizzo |
+|-----|-----------|---------|
+| 0   | ~10.3 GB  | ~84%    |
+| 1   | ~9.4 GB   | ~77%    |
+| 2   | ~9.0 GB   | ~73%    |
+| 3   | ~9.5 GB   | ~78%    |
+| 4   | ~4 MB     | 0%      |
+| 5   | ~108 MB   | <1%     |
+| **Totale** | **~38.2 GB** | |
+
+---
+
+### 🔍 Interpretazione
+
+**Buone notizie:**
+- ✅ Il modello è caricato correttamente su GPU
+- ✅ GPU 4 e 5 sono effettivamente vuote (come volevi)
+- ✅ Non c'è spillover su GPU 6 (completamente libera)
+
+**Attenzione:** vedo ~9-10 GB su **4 GPU** (0, 1, 2, 3) invece che su **3 GPU** come previsto da `gpu_split: 12,12,12,0,0,0`. Questo potrebbe significare che:
+- Ollama ha ignorato il GPU_SPLIT e fatto un auto-split su 4 GPU
+- O la configurazione non è stata rilevata (dipende da come Ollama interpreta il parametro)
+
+---
+
+### ⚠️ Prestazioni: 3 vs 4 GPU
+
+Per un modello da 35B Q4 (~39 GB):
+- **3 GPU (13 GB ciascuna)**: VRAM abbondante, PCIe minimale → **massima velocità**
+- **4 GPU (9.5 GB ciascuna)**: VRAM più stretto, più chatter PCIe → **leggermente più lento**
+
+Poiché le 3060 non hanno NVLink, ogni ulteriore GPU aumenta la latenza di comunicazione tra layer. **4 GPU potrebbe essere INFERIORI a 3 GPU per latenza di generazione.**
+
+---
+
+### 💡 Cosa ti consiglio
+
+1. **Se vuoi massima velocità:** forza il split su 3 GPU esatte:
+   ```yaml
+   OLLAMA_GPU_SPLIT=0,0,12,0,0,0
+   ```
+   Questo blocca i pesi solo su GPU 2 (con 12 GB dedicati). Le altre restano disponibili. Oppure:
+   ```yaml
+   OLLAMA_GPU_SPLIT=12,12,12,0,0,0
+   ```
+   E verifica che Ollama lo rispetti.
+
+2. **Se il GPU_SPLIT non viene applicato:** prova a vedere se Ollama supporta `OLLAMA_NUM_GPU=3` invece di `gpu_split`:
+   ```yaml
+   OLLAMA_NUM_GPU=3
+   CUDA_VISIBLE_DEVICES=0,1,2
+   ```
+   Questo elimina completamente le GPU 3-5 dal contesto del container.
+
+3. **Verifichiamo:** dopo una modifica, lancia:
+   ```bash
+   docker compose down && docker compose up -d
+   sleep 30
+   docker exec hermesollama ollama ps
+   nvidia-smi
+   ```
 root@AI-UNO:/srv/ai1/ollamaebasta# docker exec -it hermesollama ollama ps
 NAME               ID              SIZE     PROCESSOR    CONTEXT    UNTIL
 qwen3.6:35b-a3b    07d35212591f    39 GB    100% GPU     262144     9 hours from now
