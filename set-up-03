@@ -1,0 +1,54 @@
+version: "3.9"
+
+services:
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: hermesollama
+    restart: unless-stopped
+
+    ports:
+      - "11435:11434"
+    # impostazioni per codice
+    environment:
+      # networking
+      - OLLAMA_HOST=0.0.0.0
+      - OLLAMA_ORIGINS=http://10.21.20.79,http://185.109.190.231,http://10.100.10.67
+
+      # parallelismo
+      - OLLAMA_NUM_PARALLEL=1
+      - OLLAMA_MAX_LOADED_MODELS=1
+      - OLLAMA_NUM_GPU=1
+      #- OLLAMA_GPU_SPLIT=12,12,12
+      - OLLAMA_GPU_SPLIT=0
+      # - OLLAMA_MAX_QUEUE=2
+
+      # GPU visibili (opzionale se usi deploy, ma lo lascio come salvaguardia)
+      - CUDA_VISIBLE_DEVICES=0,1,2
+      # - NVIDIA_VISIBLE_DEVICES=0,1,2,3,4,5
+      # - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+      - OLLAMA_KEEP_ALIVE=10h
+      - OLLAMA_LOAD_TIMEOUT=900
+
+      # Qwen specific                                                                                                                   >      - OLLAMA_MAX_RUNNABLE_BATCH_SIZES=32
+      # Thread e Context                                                                                                                >      - OLLAMA_NUM_THREADS=$(nproc)  # Usa tutte CPU                                                                                    >      - OLLAMA_MAX_CONTEXT_SIZE=16384
+      - OLLAMA_MAX_BATCH_SIZE=32
+    volumes:
+      - /srv/ai1/ollamaebasta:/root/.ollama
+
+    runtime: nvidia
+
+    #########################################
+    # AGGIUNGI QUESTO BLOCCO PER LIMITARE LE GPU
+    #########################################
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids:
+                - "0"
+                - "1"
+                - "2"
+              capabilities:
+                - gpu
