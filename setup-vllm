@@ -1,0 +1,108 @@
+```
+# configurazione attuale che non avvia. molteplici errori 
+version: "3.9"
+
+services:
+  vllm:
+    image: vllm/vllm-openai:v0.4.2
+
+    container_name: vllm-server
+    runtime: nvidia
+    restart: unless-stopped
+
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 6
+              capabilities: [gpu]
+
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - HF_HOME=/models
+      - TRANSFORMERS_CACHE=/models
+      - NCCL_P2P_DISABLE=1
+      - NCCL_IB_DISABLE=1
+      - PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+
+    volumes:
+      - ./data:/root/.cache/huggingface
+      - /srv/ai1/vllm-server/modelli:/models
+
+    ports:
+      - "8000:8000"
+
+    command: >
+      --model Qwen/Qwen2.5-32B-Instruct **voglio massimo possibile**
+      --tensor-parallel-size 5
+      --max-model-len 32768 **voglio massimo possibile, minimo 256k**
+      --gpu-memory-utilization 0.90
+      --trust-remote-code
+      --enable-prefix-caching
+      ```
+**alcuni log di errore **
+ValueError: Too large swap space. 20.00 GiB out of the 15.52 GiB total CPU memory is allocated for the swap space.
+/usr/local/lib/python3.10/dist-packages/transformers/utils/hub.py:124: FutureWarning: Using `TRANSFORMERS_CACHE` is deprecated and will be removed in v5 of Transformers. Use `HF_HOME` instead.
+  warnings.warn(
+/usr/local/lib/python3.10/dist-packages/huggingface_hub/file_download.py:1132: FutureWarning: `resume_download` is deprecated and will be removed in version 1.0.0. Downloads always resume when possible. If you want to force a new download, use `force_download=True`.
+  warnings.warn(
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/usr/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/usr/local/lib/python3.10/dist-packages/vllm/entrypoints/openai/api_server.py", line 168, in <module>
+    engine = AsyncLLMEngine.from_engine_args(
+  File "/usr/local/lib/python3.10/dist-packages/vllm/engine/async_llm_engine.py", line 346, in from_engine_args
+    engine_config = engine_args.create_engine_config()
+  File "/usr/local/lib/python3.10/dist-packages/vllm/engine/arg_utils.py", line 602, in create_engine_config
+    return EngineConfig(model_config=model_config,
+  File "<string>", line 13, in __init__
+  File "/usr/local/lib/python3.10/dist-packages/vllm/config.py", line 1214, in __post_init__
+    self.cache_config.verify_with_parallel_config(self.parallel_config)
+  File "/usr/local/lib/python3.10/dist-packages/vllm/config.py", line 403, in verify_with_parallel_config
+    raise ValueError("Too large swap space. " + msg)
+ValueError: Too large swap space. 20.00 GiB out of the 15.52 GiB total CPU memory is allocated for the swap space.
+/usr/local/lib/python3.10/dist-packages/transformers/utils/hub.py:124: FutureWarning: Using `TRANSFORMERS_CACHE` is deprecated and will be removed in v5 of Transformers. Use `HF_HOME` instead.
+  warnings.warn(
+/usr/local/lib/python3.10/dist-packages/huggingface_hub/file_download.py:1132: FutureWarning: `resume_download` is deprecated and will be removed in version 1.0.0. Downloads always resume when possible. If you want to force a new download, use `force_download=True`.
+  warnings.warn(
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/usr/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/usr/local/lib/python3.10/dist-packages/vllm/entrypoints/openai/api_server.py", line 168, in <module>
+    engine = AsyncLLMEngine.from_engine_args(
+  File "/usr/local/lib/python3.10/dist-packages/vllm/engine/async_llm_engine.py", line 346, in from_engine_args
+    engine_config = engine_args.create_engine_config()
+  File "/usr/local/lib/python3.10/dist-packages/vllm/engine/arg_utils.py", line 602, in create_engine_config
+    return EngineConfig(model_config=model_config,
+  File "<string>", line 13, in __init__
+  File "/usr/local/lib/python3.10/dist-packages/vllm/config.py", line 1214, in __post_init__
+    self.cache_config.verify_with_parallel_config(self.parallel_config)
+  File "/usr/local/lib/python3.10/dist-packages/vllm/config.py", line 403, in verify_with_parallel_config
+    raise ValueError("Too large swap space. " + msg)
+ValueError: Too large swap space. 20.00 GiB out of the 15.52 GiB total CPU memory is allocated for the swap space.
+/usr/local/lib/python3.10/dist-packages/transformers/utils/hub.py:124: FutureWarning: Using `TRANSFORMERS_CACHE` is deprecated and will be removed in v5 of Transformers. Use `HF_HOME` instead.
+  warnings.warn(
+/usr/local/lib/python3.10/dist-packages/huggingface_hub/file_download.py:1132: FutureWarning: `resume_download` is deprecated and will be removed in version 1.0.0. Downloads always resume when possible. If you want to force a new download, use `force_download=True`.
+  warnings.warn(
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/usr/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/usr/local/lib/python3.10/dist-packages/vllm/entrypoints/openai/api_server.py", line 168, in <module>
+    engine = AsyncLLMEngine.from_engine_args(
+  File "/usr/local/lib/python3.10/dist-packages/vllm/engine/async_llm_engine.py", line 346, in from_engine_args
+    engine_config = engine_args.create_engine_config()
+  File "/usr/local/lib/python3.10/dist-packages/vllm/engine/arg_utils.py", line 602, in create_engine_config
+    return EngineConfig(model_config=model_config,
+  File "<string>", line 13, in __init__
+  File "/usr/local/lib/python3.10/dist-packages/vllm/config.py", line 1214, in __post_init__
+    self.cache_config.verify_with_parallel_config(self.parallel_config)
+  File "/usr/local/lib/python3.10/dist-packages/vllm/config.py", line 403, in verify_with_parallel_config
+    raise ValueError("Too large swap space. " + msg)
+ValueError: Too large swap space. 20.00 GiB out of the 15.52 GiB total CPU memory is allocated for the swap space.
