@@ -13,7 +13,7 @@ services:
     environment:
       # networking
       - OLLAMA_HOST=0.0.0.0
-      - OLLAMA_ORIGINS=http://10.21.20.79,http://185.109.190.231,http://10.100.10.67
+      - OLLAMA_ORIGINS=xxx
 
       # parallelismo
       - OLLAMA_NUM_PARALLEL=1
